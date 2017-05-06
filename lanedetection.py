@@ -9,12 +9,6 @@ import os
 
 # Note! All images are loaded as BGR and not RGBs, and all functions that use that colorspace assume BGR
 
-# Settings
-# Checkerboard object points for calibration
-nx_checkerboard = 9 # number of inside corners in x
-ny_checkerboard = 6 # number of inside corners in y
-inside_corners = (nx_checkerboard, ny_checkerboard)
-
 class CameraCalibration()
 	def __init__(self):
 		self.mtx = None
