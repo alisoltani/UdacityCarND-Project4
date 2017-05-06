@@ -260,6 +260,7 @@ class Line():
         
     def lanedetection(self):
         # Choose between histogram search or known search
+        self.detected = False
         
     def get_curvature(self):
         # Define y-value where we want radius of curvature
