@@ -277,7 +277,7 @@ class Line():
 		# Define y-value where we want radius of curvature
 		# I'll choose the maximum y-value, corresponding to the bottom of the image
 		y_eval = self.img.shape[0]
-		curverad = ((1 + (2*self.fit[0]*y_eval + self.fit[1])**2)**1.5) / np.absolute(2*self.fit[0])
+		curverad = ((1 + (2*self.current_fit[0]*y_eval + self.current_fit[1])**2)**1.5) / np.absolute(2*self.current_fit[0])
 
 		# Define conversions in x and y from pixels space to meters
 		ym_per_pix = 30/720 # meters per pixel in y dimension
