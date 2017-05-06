@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-%matplotlib inline
 import matplotlib.image as mpimg
 import glob
 import random
@@ -9,7 +8,7 @@ import os
 
 # Note! All images are loaded as BGR and not RGBs, and all functions that use that colorspace assume BGR
 
-class CameraCalibration()
+class CameraCalibration():
 	def __init__(self):
 		self.mtx = None
 		self.dist = None
@@ -41,10 +40,10 @@ class CameraCalibration()
 				imgpoints.append(corners)	
 				
 		
-		_, self.mtx, self.dist, -, - = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+		_, self.mtx, self.dist, _, _ = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
 		print('Calibration finished')
 		
-	def undistort(self, img)
+	def undistort(self, img):
 		return cv2.undistort(img, self.mtx, self.dist, None, self.mtx)
 		
 class BinaryFilter():
@@ -60,7 +59,7 @@ class BinaryFilter():
 		# Convert to HLS color space and separate the S channel
 		# Note: img is the undistorted image
 		hls = cv2.cvtColor(blur, cv2.COLOR_BGR2HLS)
-		s_channel = hls[:,:,2
+		s_channel = hls[:,:,2]
 		
 		# Convert to LAB color space and separate the L channel (frayscale) and B channel (yellow)
 		lab = cv2.cvtColor(blur, cv2.COLOR_BGR2LAB)
@@ -99,7 +98,7 @@ class BinaryFilter():
 		return combined_binary
 
 class PerspectiveTransform():
-	def __init__(self, src=None, dst=None)
+	def __init__(self, src=None, dst=None):
 		self.src = np.float32(
 				[[572, 455],
 				 [0, 720],
@@ -143,8 +142,8 @@ class Line():
         self.best_fit = None  
         #polynomial coefficients for the most recent fit
         self.current_fit = [np.array([False])]
-		#polynomial coefficients for the most recent fit
-		self.previous_fit = [np.array([False])] 
+	#polynomial coefficients for the most recent fit
+        self.previous_fit = [np.array([False])] 
         #radius of curvature of the line in some units
         self.radius_of_curvature = None 
         #distance in meters of vehicle center from the line
@@ -155,85 +154,81 @@ class Line():
         self.allx = None  
         #y values for detected line pixels
         self.ally = None
-		# Choose the number of sliding windows
-		self.nwindows = nwindows
-		# Set the width of the windows +/- margin
-		self.windowmargin = windowmargin
-		# Set minimum number of pixels found to recenter window
-		self.minpix = minpix
-		self.x = []
+	# Choose the number of sliding windows
+        self.nwindows = nwindows
+	# Set the width of the windows +/- margin
+        self.windowmargin = windowmargin
+	# Set minimum number of pixels found to recenter window
+        self.minpix = minpix
+        self.x = []
         self.y = []
 		
 		
-	def split_image(self, img, left=True):
-		# First function to be called, seperates left and right image to isolate the left and right lanes
-		midpoint = np.int(img.shape[0]/2)
-		if left:
-			self.img = img[:, 0:midpoint]
-		else:
-			self.img = img[:, midpoint:img.shape[0]]
+    def split_image(self, img, left=True):
+        # First function to be called, seperates left and right image to isolate the left and right lanes
+	midpoint = np.int(img.shape[0]/2)
+	if left:
+	    self.img = img[:, 0:midpoint]
+	else:
+	    self.img = img[:, midpoint:img.shape[0]]
 
-	def sliding_window_histogram(self):
-		img = self.img
-	    histogram = np.sum(img[np.int(img.shape[0]/2):,:], axis=0)
-		# Create an output image to draw on and  visualize the result
-		out_img = np.dstack((img, img, img))*255
-		base = np.argmax(histogram)
+    def sliding_window_histogram(self):
+        img = self.img
+        histogram = np.sum(img[np.int(img.shape[0]/2):,:], axis=0)
+	# Create an output image to draw on and  visualize the result
+        out_img = np.dstack((img, img, img))*255
+        base = np.argmax(histogram)
 
-		# Set height of windows
-		window_height = np.int(img.shape[0]/self.nwindows)
-		# Identify the x and y positions of all nonzero pixels in the image
-		nonzero = img.nonzero()
-		nonzeroy = np.array(nonzero[0])
-		nonzerox = np.array(nonzero[1])
-		# Current positions to be updated for each window
-		current = base
-		# Set the width of the windows +/- margin
-		margin = self.windowmargin
-		# Set minimum number of pixels found to recenter window
-		minpix = self.minpix
-		# Create empty lists to receive left and right lane pixel indices
-		lane_inds = []
+	# Set height of windows
+	window_height = np.int(img.shape[0]/self.nwindows)
+	# Identify the x and y positions of all nonzero pixels in the image
+	nonzero = img.nonzero()
+	nonzeroy = np.array(nonzero[0])
+	nonzerox = np.array(nonzero[1])
+	# Current positions to be updated for each window
+	current = base
+	# Set the width of the windows +/- margin
+	margin = self.windowmargin
+	# Set minimum number of pixels found to recenter window
+	minpix = self.minpix
+	# Create empty lists to receive left and right lane pixel indices
+	lane_inds = []
+		# Step through the windows one by one
+	for window in range(self.nwindows):
+		# Identify window boundaries in x and y (and right and left)
+		win_y_low = img.shape[0] - (window+1)*window_height
+		win_y_high = img.shape[0] - window*window_height
+		win_x_low = current - margin
+		win_x_high = current + margin
+		# Draw the windows on the visualization image
+		cv2.rectangle(out_img,(win_x_low,win_y_low),(win_x_high,win_y_high),(0,255,0), 2) 
+		# Identify the nonzero pixels in x and y within the window
+		good_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) & (nonzerox >= win_x_low) & (nonzerox < win_x_high)).nonzero()[0]
+		# Append these indices to the lists
+		lane_inds.append(good_inds)
+		# If you found > minpix pixels, recenter next window on their mean position
+		if len(good_inds) > minpix:
+			x_current = np.int(np.mean(nonzerox[good_inds]))
+	# Concatenate the arrays of indices
+	lane_inds = np.concatenate(lane_inds)
+	# Extract left and right line pixel positions
+	x = nonzerox[lane_inds]
+	y = nonzeroy[lane_inds] 
+
+	# Fit a second order polynomial to each
+	fit = np.polyfit(y, x, 2)
+	
+	self.previous_fit = self.current_fit
+	self.current_fit = fit
+	self.detected = True
+	self.allx.append(x)
+	self.ally.append(y)
+	self.x = x
+	self.y = y
+	
+	return fit, x, y
 
-		# Step through the windows one by one
-		for window in range(self.nwindows):
-			# Identify window boundaries in x and y (and right and left)
-			win_y_low = img.shape[0] - (window+1)*window_height
-			win_y_high = img.shape[0] - window*window_height
-			win_x_low = current - margin
-			win_x_high = current + margin
-			# Draw the windows on the visualization image
-			cv2.rectangle(out_img,(win_x_low,win_y_low),(win_x_high,win_y_high),(0,255,0), 2) 
-			# Identify the nonzero pixels in x and y within the window
-			good_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) & (nonzerox >= win_x_low) & (nonzerox < win_x_high)).nonzero()[0]
-			# Append these indices to the lists
-			lane_inds.append(good_inds)
-			# If you found > minpix pixels, recenter next window on their mean position
-			if len(good_inds) > minpix:
-				x_current = np.int(np.mean(nonzerox[good_inds]))
-
-		# Concatenate the arrays of indices
-		lane_inds = np.concatenate(lane_inds)
-
-		# Extract left and right line pixel positions
-		x = nonzerox[lane_inds]
-		y = nonzeroy[lane_inds] 
-
-
-		# Fit a second order polynomial to each
-		fit = np.polyfit(y, x, 2)
-		
-		self.previous_fit = self.current_fit
-		self.current_fit = fit
-		self.detected = True
-		self.allx.append(x)
-		self.ally.append(y)
-		self.x = x
-		self.y = y
-		
-		return fit, x, y
-
-	def search_known_window(self):
+    def search_known_window(self):
 		# Assume you now have a new warped binary image 
 		# from the next frame of video (also called "img")
 		# It's now much easier to find line pixels!	
