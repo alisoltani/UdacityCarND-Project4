@@ -30,7 +30,7 @@ class CameraCalibration():
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             
             # Find the chessboard corners
-            ret, corners = cv2.findChessboardCorners(gray, (nx, ny), None)
+            ret, corners = cv2.findChessboardCorners(gray, inside_corners, None)
             
             # If found, draw corners
             if ret == True:
