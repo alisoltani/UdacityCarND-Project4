@@ -127,7 +127,7 @@ class PerspectiveTransform():
 
 # Define a class to receive the characteristics of each line detection
 class Line():
-    def __init__(self, nwindows = 9, windowmargin = 100, minpix = 50):
+    def __init__(self, nwindows = 9, windowmargin = 70, minpix = 50):
         # was the line detected in the last iteration?
         self.detected = True  
         # x values of the last n fits of the line
@@ -387,10 +387,10 @@ class LaneTool():
 
 leftline = Line()
 rightline = Line()
+cc = CameraCalibration()
+cc.calibrate(path='camera_cal/')
 
 def image_pipeline(img):
-    cc = CameraCalibration()
-    cc.calibrate(path='camera_cal/')
     undist_img = cc.undistort(img)
     # Binary filter
     bf = BinaryFilter()
