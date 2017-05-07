@@ -390,7 +390,7 @@ rightline = Line()
 
 def image_pipeline(img):
     cc = CameraCalibration()
-    cc.calibrate(path='camera/cal')
+    cc.calibrate(path='camera_cal/')
     undist_img = cc.undistort(img)
     # Binary filter
     bf = BinaryFilter()
