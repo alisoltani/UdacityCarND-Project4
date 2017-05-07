@@ -5,7 +5,6 @@ import matplotlib.image as mpimg
 import glob
 import random
 import os
-%matplotlib inline
 
 # Note! All images are loaded as BGR and not RGBs, and all functions that use that colorspace assume BGR
 
@@ -385,12 +384,14 @@ class LaneTool():
             plt.imshow(result)
         return result
 		
-img = plt.imread('test_images/test2.jpg')
+
 leftline = Line()
 rightline = Line()
 
 def image_pipeline(img):
-    undist_img = undistort(img)
+    cc = CameraCalibration()
+    cc.calibrate(path='camera/cal')
+    undist_img = cc.undistort(img)
     # Binary filter
     bf = BinaryFilter()
     binary = bf.get_binary_image(img)
@@ -420,13 +421,10 @@ def image_pipeline(img):
     final_image = lt.draw_lane(undist_img, warped, display=False)
     return final_image
 
-final_image = image_pipeline(img)
-plt.imshow(final_image)
-
 from moviepy.editor import VideoFileClip
 
 output = 'project_output.mp4'
 clip1 = VideoFileClip("project_video.mp4")
 output_clip = clip1.fl_image(image_pipeline) #NOTE: this function expects color images!!
-%time output_clip.write_videofile(output, audio=False)
+output_clip.write_videofile(output, audio=False)
 	
