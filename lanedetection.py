@@ -5,6 +5,7 @@ import matplotlib.image as mpimg
 import glob
 import random
 import os
+%matplotlib inline
 
 # Note! All images are loaded as BGR and not RGBs, and all functions that use that colorspace assume BGR
 
@@ -47,7 +48,7 @@ class CameraCalibration():
         return cv2.undistort(img, self.mtx, self.dist, None, self.mtx)
         
 class BinaryFilter():
-    def __init__(self, sobel_thresh=(30, 100), s_thresh = 160, b_thresh = 50, gb_kernel=(3,5)):
+    def __init__(self, sobel_thresh=(25, 100), s_thresh = 160, b_thresh = 45, gb_kernel=(3,3)):
         self.sobel_thresh = sobel_thresh # Threshold for Sobel derivative
         self.s_thresh = s_thresh # Threshold for s channel in HLS transform
         self.b_thresh = b_thresh # Threshold for b channel in LAB transform
@@ -57,7 +58,7 @@ class BinaryFilter():
         blur = cv2.GaussianBlur(img, self.gb_kernel, 0)
         
         r_channel = blur[:,:,2]
-        r_thresh = (210, 230)
+        r_thresh = (220, 240)
         r_binary = np.zeros_like(r_channel)
         r_binary[(r_channel > r_thresh[0]) & (r_channel <= r_thresh[1])] = 1
         
@@ -81,7 +82,7 @@ class BinaryFilter():
 
         # Threshold s color channel
         s_thresh_min = self.s_thresh
-        s_thresh_max = 255
+        s_thresh_max = 200
         s_binary = np.zeros_like(s_channel)
         s_binary[(s_channel >= s_thresh_min) & (s_channel <= s_thresh_max)] = 1
         
@@ -100,10 +101,10 @@ class PerspectiveTransform():
                  [694, 450]])
                  
         self.dst = np.float32(
-                [[160, 0],
-                 [160, 720],
-                 [1120, 720],
-                 [1120, 0]])
+                [[150, 0],
+                 [150, 720],
+                 [1130, 720],
+                 [1130, 0]])
                  
         self.M = []
         self.Minv = []
@@ -127,7 +128,7 @@ class PerspectiveTransform():
 
 # Define a class to receive the characteristics of each line detection
 class Line():
-    def __init__(self, nwindows = 9, windowmargin = 70, minpix = 50):
+    def __init__(self, nwindows = 10, windowmargin = 80, minpix = 50):
         # was the line detected in the last iteration?
         self.detected = True  
         # x values of the last n fits of the line
@@ -158,8 +159,9 @@ class Line():
         self.minpix = minpix
         self.x = []
         self.y = []
-        self.alpha = 0.75
+        self.alpha = 0.7
         self.framecount = 0
+        self.base = 0
         
         
     def split_image(self, img, isLeft=True, display=True):
@@ -182,7 +184,12 @@ class Line():
         # Set height of windows
         window_height = np.int(img.shape[0]/self.nwindows)
         # Current positions to be updated for each window
-        current = base
+        if self.framecount > 0:
+            current = np.int(base * self.alpha + (1-self.alpha)*self.base)
+        else:
+            current = base
+        
+        self.base = base
         # Set the width of the windows +/- margin
         margin = self.windowmargin
         # Set minimum number of pixels found to recenter window
@@ -194,8 +201,8 @@ class Line():
         std_x = nonzerox.std()
     
         # remove outlier points 
-        nonzerox = nonzerox[np.abs(nonzerox-mean_x) < 1.55*std_x]
-        nonzeroy = nonzeroy[np.abs(nonzerox-mean_x) < 1.55*std_x]
+        nonzerox = nonzerox[np.abs(nonzerox-mean_x) < 1.4*std_x]
+        nonzeroy = nonzeroy[np.abs(nonzerox-mean_x) < 1.4*std_x]
 
         # Step through the windows one by one
         for window in range(self.nwindows):
@@ -383,7 +390,6 @@ class LaneTool():
         if display:
             plt.imshow(result)
         return result
-		
 
 leftline = Line()
 rightline = Line()
@@ -427,4 +433,4 @@ output = 'project_output.mp4'
 clip1 = VideoFileClip("project_video.mp4")
 output_clip = clip1.fl_image(image_pipeline) #NOTE: this function expects color images!!
 output_clip.write_videofile(output, audio=False)
-	
+
