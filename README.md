@@ -63,6 +63,7 @@ For this step, I use the cv2.calibrateCamera function (that takes the image and 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
 I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines 50 through 93 in `lanedetection.py`).  I use the Sobel transform (in the x dimension), the r channel in the rgb and the s channel in hls. Here's an example of my output for this step.  
+
 ![alt text][image4]
 First image is from the Sobel transform, second from the s channel, third from r channel, and last is the combined.
 
@@ -103,9 +104,11 @@ I fit my lane lines with a 2nd order polynomial like this
 ![alt text][image7]
 
 I also tried and implemented the correlation technique, shown in the figure below, but during trials it did not perform as well as the sliding window.
+
 ![alt text][image8]
 
 Once the lane-lines are identified, we can use them as starting points for the next frame (this tehcniques result are shown below), but as mentioned before in this project new sliding window wsa used every time.
+
 ![alt text][image9]
 
 These images and code used to generate them is available in AdvancedLaneDetection.ipynb
