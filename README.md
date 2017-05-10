@@ -17,7 +17,7 @@ The goals / steps of this project are the following:
 [image1]: ./examples/cameraCalbiration.png "Calibration"
 [image2]: ./examples/undistortion.png "Undistorted images"
 [image3]: ./examples/undistortion1.png "Undistorted images"
-[image4]: ./examples/binary.png "Binary Example"
+[image4]: ./examples/binarynew.png "Binary Example"
 [image5]: ./examples/warp.png "Warp Example"
 [image6]: ./examples/histogram.png "Example histogram to find starting point"
 [image7]: ./examples/slidingwindow.png "Sliding Window technique"
@@ -62,7 +62,7 @@ For this step, I use the cv2.calibrateCamera function (that takes the image and 
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines 50 through 93 in `lanedetection.py`).  I use the Sobel transform (in the x dimension), the r channel in the rgb and the s channel in hls. Here's an example of my output for this step.  
+I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines 50 through 93 in `lanedetection.py`).  I use the Sobel transform (in the x dimension), the b channel in the lab for yellow and v channel in LUV for white. Here's an example of my output for this step.  
 
 ![alt text][image4]
 First image is from the Sobel transform, second from the s channel, third from r channel, and last is the combined.
@@ -98,7 +98,7 @@ Once I undistort, change the image to binary and unwarp the image, the next step
 In this function, I first split the image and do a histogram on the bottom half, to find an appropriate starting position.
 ![alt text][image6]
 
-Once that is done, I discard outlier points in the image (which are more than 1.5 standard deviations away from this value), to help reduce false positives. After that I start from the bottom of the image and generate rectangles, and find lane line pixels in those rectangles. I use the mean value of the pixels to update the base value position of the lanes, to be able to track curves. Once all windows are generated, 
+Once that is done, I start from the bottom of the image and generate rectangles, and find lane line pixels in those rectangles. I use the mean value of the pixels to update the base value position of the lanes, to be able to track curves. Once all windows are generated, 
 I fit my lane lines with a 2nd order polynomial like this
 
 ![alt text][image7]
